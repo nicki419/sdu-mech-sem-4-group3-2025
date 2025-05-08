@@ -1,26 +1,86 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useState } from 'react';
+import {ConfigProvider, Layout, Menu, Typography, Switch, theme} from 'antd';
+import { SettingOutlined, ControlOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import ControlPage from './ControlPage';
+import CalibrationPage from './CalibrationPage';
 
-function App() {
+const { Header, Sider, Content } = Layout;
+const { Title } = Typography;
+
+// Export valve positions type globally for use in other components
+export type ValvePosition = 'open' | 'neutral' | 'closed';
+
+const App = () => {
+  const [collapsed, setCollapsed] = useState(false);
+  const [selectedKey, setSelectedKey] = useState('control');
+  const [darkMode, setDarkMode] = useState(true); // Dark mode state
+
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'control',
+      icon: <ControlOutlined />,
+      label: 'Control',
+    },
+    {
+      key: 'calibration',
+      icon: <SettingOutlined />,
+      label: 'Calibration',
+    },
+  ];
+
+  const toggleDarkMode = (checked: boolean) => {
+    setDarkMode(checked);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <ConfigProvider theme={{ algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
+        <Layout style={{ minHeight: '66.66vh' }}>
+          <Sider collapsed={collapsed} onCollapse={setCollapsed} theme={darkMode ? 'dark' : 'light'}>
+            <div style={{ padding: '16px', color: darkMode ? 'white' : 'black', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>
+              <strong>Navigation</strong>
+                <Switch
+                    checked={darkMode}
+                    onChange={toggleDarkMode}
+                    checkedChildren={<MoonOutlined />}
+                    unCheckedChildren={<SunOutlined />}
+                    style={{ width: 40 }}
+                />
+            </div>
+            <Menu
+                theme={darkMode ? 'dark' : 'light'}
+                mode="inline"
+                selectedKeys={[selectedKey]}
+                onClick={(e) => setSelectedKey(e.key)}
+                items={menuItems}
+            />
+          </Sider>
+
+          <Layout>
+            <Header
+                style={{
+                  background: darkMode ? 'black' : 'white',
+                  padding: 0,
+                  paddingLeft: 16,
+                  paddingTop: 14,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+            >
+              <Title level={3} style={{ margin: 0 }}>
+                Group 3: Valve Control System
+              </Title>
+            </Header>
+
+            <Content style={{ margin: '16px' }}>
+              {selectedKey === 'control' && <ControlPage />}
+              {selectedKey === 'calibration' && <CalibrationPage />}
+            </Content>
+          </Layout>
+        </Layout>
+      </ConfigProvider>
   );
-}
+};
 
 export default App;
