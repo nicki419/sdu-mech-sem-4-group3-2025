@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {ConfigProvider, Layout, Menu, Typography, Switch, theme} from 'antd';
 import { SettingOutlined, ControlOutlined, SunOutlined, MoonOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
@@ -14,9 +14,13 @@ export type ValvePosition = 'open' | 'neutral' | 'closed';
 const App = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKey, setSelectedKey] = useState('control');
-  const [darkMode, setDarkMode] = useState(true); // Dark mode state
+    const [darkMode, setDarkMode] = useState(() => {
+        const stored = localStorage.getItem('darkMode');
+        return stored === null ? true : stored === 'true';
+    });
 
-  const menuItems: MenuProps['items'] = [
+
+    const menuItems: MenuProps['items'] = [
     {
       key: 'control',
       icon: <ControlOutlined />,
@@ -29,9 +33,10 @@ const App = () => {
     },
   ];
 
-  const toggleDarkMode = (checked: boolean) => {
-    setDarkMode(checked);
-  };
+    const toggleDarkMode = (checked: boolean) => {
+        setDarkMode(checked);
+        localStorage.setItem('darkMode', String(checked));
+    };
 
   return (
       <ConfigProvider theme={{ algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
@@ -74,7 +79,7 @@ const App = () => {
             </Header>
 
             <Content style={{ margin: '16px' }}>
-              {selectedKey === 'control' && <ControlPage />}
+              {selectedKey === 'control' && <ControlPage darkMode={darkMode} />}
               {selectedKey === 'calibration' && <CalibrationPage darkMode={darkMode} />}
             </Content>
           </Layout>

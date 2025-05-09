@@ -1,22 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Typography, Button, Row, Col } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
-import ReactSpeedometer, { CustomSegmentLabelPosition } from 'react-d3-speedometer';
+import Speedometer from './Speedometer';
 
 const { Text, Title } = Typography;
 
 interface ValveCalibrationProps {
-    valveName: string;
+    valveId: number;
     darkMode: boolean;
 }
 
-const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveName, darkMode }) => {
+const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode }) => {
     const [angle, setAngle] = useState(0);
     const [savedOpen, setSavedOpen] = useState<number | null>(null);
     const [savedReverse, setSavedReverse] = useState<number | null>(null);
 
-    const textColor = darkMode ? '#ffffff' : '#000000';
-    const gaugeColor = '#1890ff';
+    const storageKey = (type: 'open' | 'closed') => `valve-${valveId}-${type}`;
+
+    // Load saved values on mount
+    useEffect(() => {
+        const open = localStorage.getItem(storageKey('open'));
+        const reverse = localStorage.getItem(storageKey('closed'));
+
+        if (open !== null) setSavedOpen(parseInt(open, 10));
+        if (reverse !== null) setSavedReverse(parseInt(reverse, 10));
+    }, [valveId]);
 
     const updateAngle = (delta: number) => {
         setAngle(prev => Math.max(-90, Math.min(90, prev + delta)));
@@ -24,53 +32,28 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveName, darkMode
 
     const resetAngle = () => setAngle(0);
 
-    const saveOpen = () => setSavedOpen(angle);
-    const saveReverse = () => setSavedReverse(angle);
+    const saveOpen = () => {
+        localStorage.setItem(storageKey('open'), angle.toString());
+        setSavedOpen(angle);
+    };
+
+    const saveReverse = () => {
+        localStorage.setItem(storageKey('closed'), angle.toString());
+        setSavedReverse(angle);
+    };
+
+    const clearSaved = () => {
+        localStorage.removeItem(storageKey('open'));
+        localStorage.removeItem(storageKey('closed'));
+        setSavedOpen(null);
+        setSavedReverse(null);
+    };
+
 
     return (
-        <Card title={valveName} style={{ marginBottom: 24, width: '100%', padding: '8px 12px' }}>
+        <Card title={`Valve ${valveId + 1}`} style={{ marginBottom: 24, width: '100%', padding: '8px 12px' }}>
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                {/* Speedometer */}
-                <div style={{ textAlign: 'center', marginRight: 24 }}>
-                    <div style={{ marginBottom: 8 }}>
-                        <strong>0</strong>
-                    </div>
-                    <ReactSpeedometer
-                        key={darkMode ? 'dark' : 'light'}
-                        value={angle}
-                        minValue={-90}
-                        maxValue={90}
-                        segments={18}
-                        needleColor={gaugeColor}
-                        startColor={gaugeColor}
-                        endColor={gaugeColor}
-                        textColor={textColor}
-                        ringWidth={30}
-                        width={200}
-                        height={125}
-                        customSegmentLabels={[
-                            { text: "-90", position: CustomSegmentLabelPosition.Outside, color: textColor, fontSize: "12px" },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "-45", position: CustomSegmentLabelPosition.Outside, color: textColor, fontSize: "12px" },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "45", position: CustomSegmentLabelPosition.Outside, color: textColor, fontSize: "12px" },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "", position: CustomSegmentLabelPosition.Outside, color: textColor },
-                            { text: "90", position: CustomSegmentLabelPosition.Outside, color: textColor, fontSize: "12px" },
-                        ]}
-                        currentValueText={`${angle}°`}
-                    />
-                </div>
+                <Speedometer angle={angle} darkMode={darkMode} />
 
                 {/* Buttons */}
                 <div style={{ flex: 1, paddingRight: 24 }}>
@@ -95,7 +78,12 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveName, darkMode
                             <Button type="primary" block onClick={saveOpen}>Save open</Button>
                         </Col>
                         <Col style={{ flex: 1, minWidth: 100 }}>
-                            <Button danger block onClick={saveReverse}>Save reverse</Button>
+                            <Button type="primary" block onClick={saveReverse}>Save reverse</Button>
+                        </Col>
+                        <Col>
+                            <Button danger ghost block onClick={clearSaved}>
+                                Clear saved values
+                            </Button>
                         </Col>
                     </Row>
                 </div>

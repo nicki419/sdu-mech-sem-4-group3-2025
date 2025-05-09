@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ValveSwitch from './components/ValveSwitch';
 import { ValvePosition } from './App';
 import { Typography, Row, Col, Alert } from 'antd';
 
 const { Paragraph } = Typography;
 
-const ControlPage: React.FC = () => {
-    const [valves, setValves] = useState<ValvePosition[]>(['neutral', 'neutral', 'neutral']);
-    const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
+interface ControlPageProps {
+    darkMode: boolean;
+}
 
+const ControlPage: React.FC<ControlPageProps> = ({darkMode}) => {
+    const [valves, setValves] = useState<ValvePosition[]>(['neutral', 'neutral', 'neutral']);
+    const pressedKeysRef = useRef<Set<string>>(new Set());
+    
     // Map keyboard keys to valve control
     const keyMap: Record<string, { index: number; position: ValvePosition }> = {
         a: { index: 0, position: 'open' },
@@ -33,29 +37,41 @@ const ControlPage: React.FC = () => {
         setValves(newValves);
     };
 
+    const loadSavedAngle = (valveId: number, position: ValvePosition): number => {
+        const key = `valve_${valveId}_${position}`;
+        const val = localStorage.getItem(key);
+        return val ? parseInt(val, 10) : 0;
+    };
+
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (!keyMap[e.key.toLowerCase()]) return;
-            setPressedKeys((prev) => {
-                const updated = new Set(prev);
-                updated.add(e.key.toLowerCase());
+            const key = e.key.toLowerCase();
+            if (!keyMap[key]) return;
+
+            const updated = new Set(pressedKeysRef.current);
+            if (!updated.has(key)) {
+                updated.add(key);
+                pressedKeysRef.current = updated;
                 updateValvesFromKeys(updated);
-                return updated;
-            });
+            }
         };
 
         const handleKeyUp = (e: KeyboardEvent) => {
-            if (!keyMap[e.key.toLowerCase()]) return;
-            setPressedKeys((prev) => {
-                const updated = new Set(prev);
-                updated.delete(e.key.toLowerCase());
+            const key = e.key.toLowerCase();
+            if (!keyMap[key]) return;
+
+            const updated = new Set(pressedKeysRef.current);
+            if (updated.has(key)) {
+                updated.delete(key);
+                pressedKeysRef.current = updated;
                 updateValvesFromKeys(updated);
-                return updated;
-            });
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
+
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
@@ -68,38 +84,37 @@ const ControlPage: React.FC = () => {
         setValves(updated);
     };
 
+    const angles = valves.map((pos, idx) =>
+        pos === 'neutral' ? 0 : loadSavedAngle(idx, pos)
+    );
+
     return (
         <div>
-            <Row gutter={32} justify="center">
+            <Row gutter={20} justify="center">
                 {valves.map((pos, idx) => (
-                    <Col key={idx}>
-                        <ValveSwitch
-                            label={`Valve ${idx + 1}`}
-                            position={pos}
-                            onChange={(newPos) => setValve(idx, newPos)}
-                        />
-                    </Col>
+                        <Col key={idx}>
+                            <ValveSwitch
+                                name={`Valve ${idx + 1}`}
+                                position={pos}
+                                darkMode={darkMode}
+                                valveId={idx}
+                                keyUp={
+                                    Object.entries(keyMap).find(
+                                        ([, value]) => value.index === idx && value.position === 'open'
+                                    )?.[0] || ''
+                                }
+                                keyDown={
+                                    Object.entries(keyMap).find(
+                                        ([, value]) => value.index === idx && value.position === 'closed'
+                                    )?.[0] || ''
+                                }
+                                onChange={(newPos) => setValve(idx, newPos)}
+                            />
+                        </Col>
                 ))}
             </Row>
             <br />
             <br />
-            <Alert
-                message="Keyboard Controls"
-                description={
-                    <Paragraph>
-                        Hold <strong>A/S/D</strong> to set Valve 1–3 to <strong>Open</strong><br />
-                        Hold <strong>J/K/L</strong> to set Valve 1–3 to <strong>Closed</strong><br />
-                        Releasing the key will return it to <strong>Neutral</strong>
-                        <br />
-                        <br />
-                        <strong>Clicking the buttons</strong> will set the valves to the corresponding position permanently.
-                        Pressing any of the above buttons will override the button state.
-                    </Paragraph>
-                }
-                type="info"
-                showIcon
-                style={{ marginBottom: 24 }}
-            />
         </div>
     );
 };
