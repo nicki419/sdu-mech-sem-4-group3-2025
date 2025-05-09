@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/sdu-mech-sem-4-group3-2025/static/css/main.1e1fe6ac.css",
-    "main.js": "/sdu-mech-sem-4-group3-2025/static/js/main.c15902e1.js",
+    "main.js": "/sdu-mech-sem-4-group3-2025/static/js/main.4d8e6820.js",
     "static/js/453.c5eaf93b.chunk.js": "/sdu-mech-sem-4-group3-2025/static/js/453.c5eaf93b.chunk.js",
     "index.html": "/sdu-mech-sem-4-group3-2025/index.html",
     "main.1e1fe6ac.css.map": "/sdu-mech-sem-4-group3-2025/static/css/main.1e1fe6ac.css.map",
-    "main.c15902e1.js.map": "/sdu-mech-sem-4-group3-2025/static/js/main.c15902e1.js.map",
+    "main.4d8e6820.js.map": "/sdu-mech-sem-4-group3-2025/static/js/main.4d8e6820.js.map",
     "453.c5eaf93b.chunk.js.map": "/sdu-mech-sem-4-group3-2025/static/js/453.c5eaf93b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.1e1fe6ac.css",
-    "static/js/main.c15902e1.js"
+    "static/js/main.4d8e6820.js"
   ]
 }
