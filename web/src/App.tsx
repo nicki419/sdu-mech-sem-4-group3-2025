@@ -75,7 +75,7 @@ const App = () => {
 
             <Content style={{ margin: '16px' }}>
               {selectedKey === 'control' && <ControlPage />}
-              {selectedKey === 'calibration' && <CalibrationPage />}
+              {selectedKey === 'calibration' && <CalibrationPage darkMode={darkMode} />}
             </Content>
           </Layout>
         </Layout>

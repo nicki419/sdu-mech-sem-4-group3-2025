@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ValveSwitch from './ValveSwitch';
+import ValveSwitch from './components/ValveSwitch';
 import { ValvePosition } from './App';
 import { Typography, Row, Col, Alert } from 'antd';
 

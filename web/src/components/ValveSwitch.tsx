@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'antd';
 import { UpOutlined, DownOutlined, PauseOutlined } from '@ant-design/icons';
-import { ValvePosition } from './App';
+import { ValvePosition } from '../App';
 
 interface ValveSwitchProps {
     label: string;

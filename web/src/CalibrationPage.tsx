@@ -1,13 +1,22 @@
+// CalibrationPage.tsx
 import React from 'react';
 import { Typography } from 'antd';
+import ValveCalibration from './components/ValveCalibration';
 
 const { Title } = Typography;
 
-const CalibrationPage: React.FC = () => {
+interface CalibrationPageProps {
+    darkMode: boolean;
+}
+
+const CalibrationPage: React.FC<CalibrationPageProps> = ({ darkMode }) => {
     return (
         <div>
             <Title level={4}>Calibration</Title>
-            <p>This page is currently empty. It will be used to calibrate the positions of the server motor correlating to the state of the valves.</p>
+            <p>Use the controls below to calibrate the angle for each valve's motor.</p>
+            <ValveCalibration valveName="Valve 1" darkMode={darkMode} />
+            <ValveCalibration valveName="Valve 2" darkMode={darkMode} />
+            <ValveCalibration valveName="Valve 3" darkMode={darkMode} />
         </div>
     );
 };
