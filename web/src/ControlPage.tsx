@@ -9,12 +9,14 @@ const { Paragraph } = Typography;
 
 interface ControlPageProps {
     darkMode: boolean;
+    serialManager: SerialManager;
+    serialLog: string[];
+    setSerialLog: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const ControlPage: React.FC<ControlPageProps> = ({ darkMode }) => {
+const ControlPage: React.FC<ControlPageProps> = ({ darkMode, serialManager, serialLog, setSerialLog }) => {
     const [valves, setValves] = useState<ValvePosition[]>(['neutral', 'neutral', 'neutral']);
     const pressedKeysRef = useRef<Set<string>>(new Set());
-    const [serialManager] = useState(() => new SerialManager());
 
     const keyMap: Record<string, { index: number; position: ValvePosition }> = {
         a: { index: 0, position: 'open' },
@@ -72,7 +74,7 @@ const ControlPage: React.FC<ControlPageProps> = ({ darkMode }) => {
         <div>
             <Row gutter={[20, 20]} align="top" justify="start" style={{marginTop: -20}}>
                 <Col>
-                    <ArduinoStatusPanel serial={serialManager} darkMode={darkMode} />
+                    <ArduinoStatusPanel serial={serialManager} serialLog={serialLog} setSerialLog={setSerialLog} />
                 </Col>
             </Row>
             

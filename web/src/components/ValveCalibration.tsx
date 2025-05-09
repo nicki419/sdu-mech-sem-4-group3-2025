@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Button, Row, Col } from 'antd';
+import { Card, Typography, Button, Row, Col, Switch } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import Speedometer from './Speedometer';
+import { SerialManager } from "../utils/SerialManager";
 
 const { Text, Title } = Typography;
 
 interface ValveCalibrationProps {
     valveId: number;
     darkMode: boolean;
+    serialManager: SerialManager;
+    sendLive: boolean;
 }
 
-const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode }) => {
+const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode, serialManager, sendLive }) => {
     const [angle, setAngle] = useState(0);
     const [savedOpen, setSavedOpen] = useState<number | null>(null);
     const [savedReverse, setSavedReverse] = useState<number | null>(null);
@@ -26,11 +29,25 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode }
         if (reverse !== null) setSavedReverse(parseInt(reverse, 10));
     }, [valveId]);
 
+    // Send serial message when angle changes
+    useEffect(() => {
+        if (sendLive && serialManager.connected) {
+            const message = `CALIBRATE:${valveId}:${angle}`;
+            serialManager.send(message);
+        }
+    }, [angle, valveId, sendLive, serialManager]);
+
     const updateAngle = (delta: number) => {
         setAngle(prev => Math.max(-90, Math.min(90, prev + delta)));
     };
 
-    const resetAngle = () => setAngle(0);
+    const resetAngle = () => {
+        setAngle(0);
+        if (sendLive && serialManager.connected) {
+            const message = `CALIBRATE:${valveId}:0`; // Send reset to Arduino
+            serialManager.send(message);
+        }
+    };
 
     const saveOpen = () => {
         localStorage.setItem(storageKey('open'), angle.toString());
@@ -48,7 +65,6 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode }
         setSavedOpen(null);
         setSavedReverse(null);
     };
-
 
     return (
         <Card title={`Valve ${valveId + 1}`} style={{ marginBottom: 24, width: '100%', padding: '8px 12px' }}>

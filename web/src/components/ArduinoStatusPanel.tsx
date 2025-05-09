@@ -8,21 +8,25 @@ const { Text } = Typography;
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
 
 interface ArduinoStatusPanelProps {
-    darkMode: boolean;
     serial: SerialManager;
+    serialLog: string[];
+    setSerialLog: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const ArduinoStatusPanel: React.FC<ArduinoStatusPanelProps> = ({ serial, darkMode }) => {
+const ArduinoStatusPanel: React.FC<ArduinoStatusPanelProps> = ({ serial, serialLog, setSerialLog }) => {
     const [status, setStatus] = useState<ConnectionStatus>('disconnected');
-    const [serialLog, setSerialLog] = useState<string[]>(['[INFO] System ready.']);
     const logEndRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         serial.onReceive((data: string) => {
             // Process incoming serial messages, e.g., V1: 45° or V1: 0°
             if (data.startsWith('V') && data.includes(':')) {
-                // Log all values, including V1: 0°
-                setSerialLog((prevLog) => [...prevLog, `[INFO] ${data}°`]);
+                const match = data.match(/V(\d+):/);
+                if (match) {
+                    const incrementedValue = parseInt(match[1], 10) + 1;
+                    const updatedData = data.replace(/V(\d+):/, `V${incrementedValue}:`);
+                    setSerialLog((prevLog) => [...prevLog, `[INFO] ${updatedData}`]);
+                }
             }
         });
     }, [serial]);
