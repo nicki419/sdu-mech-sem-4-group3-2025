@@ -73,7 +73,7 @@ const App = () => {
                   alignItems: 'center',
                 }}
             >
-              <Title level={3} style={{ margin: 0 }}>
+              <Title level={3} style={{ marginTop: -15 }}>
                 Group 3: Valve Control System
               </Title>
             </Header>

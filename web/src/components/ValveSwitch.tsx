@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Card } from 'antd';
 import { UpOutlined, DownOutlined, PauseOutlined } from '@ant-design/icons';
 import { ValvePosition } from '../App';
-import Speedometer from "./Speedometer";
+import Speedometer from './Speedometer';
+import { SerialManager } from '../utils/SerialManager';
 
 interface ValveSwitchProps {
     position: ValvePosition;
@@ -12,9 +13,19 @@ interface ValveSwitchProps {
     keyDown: string;
     valveId: number;
     onChange: (pos: ValvePosition) => void;
+    serialManager: SerialManager;
 }
 
-const ValveSwitch: React.FC<ValveSwitchProps> = ({ position, name, darkMode, keyUp, keyDown, valveId, onChange }) => {
+const ValveSwitch: React.FC<ValveSwitchProps> = ({
+                                                     position,
+                                                     name,
+                                                     darkMode,
+                                                     keyUp,
+                                                     keyDown,
+                                                     valveId,
+                                                     onChange,
+                                                     serialManager,
+                                                 }) => {
     // Helper to handle button press
     const setTo = (target: ValvePosition) => () => {
         onChange(target);
@@ -23,30 +34,29 @@ const ValveSwitch: React.FC<ValveSwitchProps> = ({ position, name, darkMode, key
     const getSavedAngle = (valveId: number, position: ValvePosition): number => {
         const key = `valve-${valveId}-${position}`;
         const savedValue = localStorage.getItem(key);
-
-        if (savedValue) {
-            console.log(`Reading angle for ${key} = ${savedValue}`);
-            return parseInt(savedValue, 10);
-        } else {
-            console.log(`No saved angle for ${key}`);
-            return 0; // Return a default value if none is found
-        }
+        return savedValue ? parseInt(savedValue, 10) : 0;
     };
 
     const angle = position === 'neutral' ? 0 : getSavedAngle(valveId, position);
 
+    // Send serial message when position changes
+    useEffect(() => {
+        const angleValue = position === 'neutral' ? 0 : angle;
+
+        if (serialManager.connected) {
+            const message = `V${valveId}:${angleValue}`;
+            serialManager.send(message);
+        }
+        
+    }, [position, angle, valveId, serialManager]);
+
     return (
-        <Card  title={name} style={{ marginBottom: 24, padding: '8px 12px' }}>
+        <Card title={name} style={{ marginBottom: 24, padding: '8px 12px' }}>
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                {/* Speedometer */}
                 <div style={{ transform: 'scale(0.9)', transformOrigin: 'center left' }}>
                     <Speedometer angle={angle} darkMode={darkMode} />
                 </div>
-                
-                {/* Buttons */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    
-                    {/* Key up indicator */}
                     <Button
                         disabled
                         style={{
@@ -59,16 +69,14 @@ const ValveSwitch: React.FC<ValveSwitchProps> = ({ position, name, darkMode, key
                     >
                         {keyUp.toUpperCase()}
                     </Button>
-        
-                    {/* Button to switch to 'open' */}
+
                     <Button
                         type={position === 'open' ? 'primary' : 'default'}
                         icon={<UpOutlined />}
                         onClick={setTo('open')}
                         shape="circle"
                     />
-        
-                    {/* Button to switch to 'neutral' */}
+
                     <Button
                         type={position === 'neutral' ? 'primary' : 'default'}
                         icon={<PauseOutlined />}
@@ -76,8 +84,7 @@ const ValveSwitch: React.FC<ValveSwitchProps> = ({ position, name, darkMode, key
                         shape="circle"
                         style={{ margin: '8px 0' }}
                     />
-        
-                    {/* Button to switch to 'closed' */}
+
                     <Button
                         type={position === 'closed' ? 'primary' : 'default'}
                         icon={<DownOutlined />}
@@ -85,7 +92,6 @@ const ValveSwitch: React.FC<ValveSwitchProps> = ({ position, name, darkMode, key
                         shape="circle"
                     />
 
-                    {/* Key down indicator */}
                     <Button
                         disabled
                         style={{
