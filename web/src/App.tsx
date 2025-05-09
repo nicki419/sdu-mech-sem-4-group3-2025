@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {ConfigProvider, Layout, Menu, Typography, Switch, theme} from 'antd';
 import { SettingOutlined, ControlOutlined, SunOutlined, MoonOutlined, FullscreenOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { Modal, App as AntApp } from 'antd';
 import ControlPage from './ControlPage';
 import CalibrationPage from './CalibrationPage';
 import { SerialManager } from './utils/SerialManager'
@@ -21,11 +22,24 @@ const App = () => {
     });
     const [serialManager] = useState(() => new SerialManager());
     const [serialLog, setSerialLog] = useState<string[]>(['[INFO] System ready.']);
+    const [serialSupported, setSerialSupported] = useState(true);
+    const [modal, contextHolder] = Modal.useModal();
 
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, []);    
+        if (!("serial" in navigator)) {
+            setSerialSupported(false);
+            modal.error({
+                title: "Your browser is incompatible.",
+                content: "This application requires Web Serial API. Try using Chrome, Edge, or Opera.",
+                okButtonProps: { style: { display: 'none' } },
+                closable: false,
+                maskClosable: false,
+                keyboard: false,
+            });
+        }
+    }, []);
 
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
@@ -59,6 +73,7 @@ const App = () => {
 
   return (
       <ConfigProvider theme={{ algorithm: darkMode ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
+        {contextHolder}
         <Layout style={{ minHeight: '66.66vh' }}>
           <Sider collapsed={collapsed} onCollapse={setCollapsed} theme={darkMode ? 'dark' : 'light'}>
             <div style={{ padding: '16px', color: darkMode ? 'white' : 'black', display: 'flex', justifyContent: 'space-between', alignItems: 'center'  }}>

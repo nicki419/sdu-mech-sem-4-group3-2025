@@ -14,7 +14,26 @@ interface ArduinoStatusPanelProps {
 }
 
 const ArduinoStatusPanel: React.FC<ArduinoStatusPanelProps> = ({ serial, serialLog, setSerialLog }) => {
-    const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+    const [status, setStatus] = useState<ConnectionStatus>(
+        serial.connected ? 'connected' : 'disconnected'
+    );
+
+    useEffect(() => {
+        // Update status when SerialManager changes
+        if (serial.connected) {
+            setStatus('connected');
+        } else {
+            setStatus('disconnected');
+        }
+    }, [serial.connected]);
+
+    useEffect(() => {
+        serial.onConnectionChange((connected) => {
+            setStatus(connected ? 'connected' : 'disconnected');
+        });
+    }, [serial]);
+
+
     const logEndRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {

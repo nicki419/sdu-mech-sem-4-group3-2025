@@ -10,6 +10,8 @@ export class SerialManager {
     private inputDone?: Promise<void>;
     private outputDone?: Promise<void>;
 
+    private connectionListeners: ((connected: boolean) => void)[] = [];
+
     async connect(): Promise<void> {
         this.port = await navigator.serial.requestPort();
         await this.port.open({ baudRate: 115200 });
@@ -86,6 +88,16 @@ export class SerialManager {
             if (result) return true;
         }
         return false;
+    }
+
+    onConnectionChange(callback: (connected: boolean) => void) {
+        this.connectionListeners.push(callback);
+    }
+
+    private notifyConnectionChange() {
+        for (const cb of this.connectionListeners) {
+            cb(this.connected);
+        }
     }
 
     private async waitForResponse(expected: string, timeout: number): Promise<boolean> {

@@ -32,7 +32,7 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode, 
     // Send serial message when angle changes
     useEffect(() => {
         if (sendLive && serialManager.connected) {
-            const message = `CALIBRATE:${valveId}:${angle}`;
+            const message = `V${valveId}:${angle}`;
             serialManager.send(message);
         }
     }, [angle, valveId, sendLive, serialManager]);
@@ -44,7 +44,7 @@ const ValveCalibration: React.FC<ValveCalibrationProps> = ({ valveId, darkMode, 
     const resetAngle = () => {
         setAngle(0);
         if (sendLive && serialManager.connected) {
-            const message = `CALIBRATE:${valveId}:0`; // Send reset to Arduino
+            const message = `V${valveId}:0`; // Send reset to Arduino
             serialManager.send(message);
         }
     };
