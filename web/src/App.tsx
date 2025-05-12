@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import {ConfigProvider, Layout, Menu, Typography, Switch, theme} from 'antd';
-import { SettingOutlined, ControlOutlined, SunOutlined, MoonOutlined, FullscreenOutlined } from '@ant-design/icons';
+import { SettingOutlined, ControlOutlined, SunOutlined, MoonOutlined, FullscreenOutlined, CodeOutlined, GithubOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Modal, App as AntApp } from 'antd';
 import ControlPage from './ControlPage';
 import CalibrationPage from './CalibrationPage';
 import { SerialManager } from './utils/SerialManager'
+import ArduinoPage from "./ArduinoPage";
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -39,6 +40,19 @@ const App = () => {
                 keyboard: false,
             });
         }
+        else {
+            const shown = localStorage.getItem("fullscreenTipShown");
+            if (!shown) {
+                modal.info({
+                    title: "Tip",
+                    content: "Enter fullscreen by pressing the button in the top right, then use Ctrl+ +/- to zoom in and out such that the three valve controllers fit the screen.",
+                    okText: "Got it!",
+                    onOk: () => {
+                        localStorage.setItem("fullscreenTipShown", "true");
+                    }
+                });
+            }
+        }
     }, []);
 
     const toggleFullscreen = () => {
@@ -64,6 +78,20 @@ const App = () => {
       icon: <SettingOutlined />,
       label: 'Calibration',
     },
+    {
+        key: 'arduino',
+        icon: <CodeOutlined />,
+        label: 'Arduino Sketch',
+    },
+        {
+            key: 'github',
+            icon: <GithubOutlined />,
+            label: (
+                <a href="https://github.com/nicki419/sdu-mech-sem-4-group3-2025" target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+            ),
+        }
     ];
 
     const toggleDarkMode = (checked: boolean) => {
@@ -90,7 +118,13 @@ const App = () => {
                 theme={darkMode ? 'dark' : 'light'}
                 mode="inline"
                 selectedKeys={[selectedKey]}
-                onClick={(e) => setSelectedKey(e.key)}
+                onClick={(e) => {
+                    if (e.key === 'github') {
+                        window.open('https://github.com/nicki419/sdu-mech-sem-4-group3-2025', '_blank');
+                        return; // do not update selectedKey
+                    }
+                    setSelectedKey(e.key);
+                }}
                 items={menuItems}
             />
           </Sider>
@@ -121,6 +155,7 @@ const App = () => {
             <Content style={{ margin: '16px' }}>
               {selectedKey === 'control' && <ControlPage darkMode={darkMode} serialManager={serialManager} serialLog={serialLog} setSerialLog={setSerialLog} />}
               {selectedKey === 'calibration' && <CalibrationPage darkMode={darkMode} serialManager={serialManager} serialLog={serialLog} setSerialLog={setSerialLog} />}
+              {selectedKey === 'arduino' && <ArduinoPage />}
             </Content>
           </Layout>
         </Layout>
