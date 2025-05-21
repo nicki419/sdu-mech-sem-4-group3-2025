@@ -38,7 +38,8 @@ const ArduinoStatusPanel: React.FC<ArduinoStatusPanelProps> = ({ serial, serialL
 
     useEffect(() => {
         serial.onReceive((data: string) => {
-            // Process incoming serial messages, e.g., V1: 45° or V1: 0°
+            setSerialLog((prevLog) => [...prevLog, `[RECV] ${data}`]);
+
             if (data.startsWith('V') && data.includes(':')) {
                 const match = data.match(/V(\d+):/);
                 if (match) {

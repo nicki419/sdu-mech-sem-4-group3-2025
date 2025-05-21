@@ -4,6 +4,7 @@ import { ValvePosition } from './App';
 import { Typography, Row, Col, Alert } from 'antd';
 import ArduinoStatusPanel from "./components/ArduinoStatusPanel";
 import { SerialManager } from './utils/SerialManager';
+import PumpThrottle from "./components/PumpThrottle";
 
 const { Paragraph } = Typography;
 
@@ -72,11 +73,15 @@ const ControlPage: React.FC<ControlPageProps> = ({ darkMode, serialManager, seri
 
     return (
         <div>
-            <Row gutter={[20, 20]} align="top" justify="start" style={{marginTop: -20}}>
+            <Row gutter={[20, 20]} align="top" justify="start" style={{marginTop: 0}}>
                 <Col>
                     <ArduinoStatusPanel serial={serialManager} serialLog={serialLog} setSerialLog={setSerialLog} />
                 </Col>
-            </Row>
+                <Col style={{marginTop: -20}}>
+                    <PumpThrottle serialManager={serialManager} />
+                </Col>
+
+        </Row>
             
             <Row gutter={20} justify="start" style={{marginTop: 20}}>
                 {valves.map((pos, idx) => (
