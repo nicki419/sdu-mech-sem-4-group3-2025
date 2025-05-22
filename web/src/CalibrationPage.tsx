@@ -34,7 +34,7 @@ const CalibrationPage: React.FC<CalibrationPageProps> = ({ darkMode, serialManag
                 </Paragraph>
             </Card>
 
-            {[0, 1, 2].map(id => (
+            {[0, 1, 2, 3].map(id => (
                 <ValveCalibration
                     key={id}
                     valveId={id}

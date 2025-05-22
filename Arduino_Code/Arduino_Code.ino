@@ -3,7 +3,8 @@
 #define SERVO1_PIN 11
 #define SERVO2_PIN 12
 #define SERVO3_PIN 13
-#define PUMP_PIN 10
+#define SERVO4_PIN 10
+#define PUMP_PIN 9
 
 #define FORWARD 180
 #define NEUTRAL 90
@@ -19,12 +20,13 @@ void setup()
   servos[0].attach(SERVO1_PIN);
   servos[1].attach(SERVO2_PIN);
   servos[2].attach(SERVO3_PIN);
+  servos[3].attach(SERVO4_PIN);
 
   pump.attach(PUMP_PIN);
   pump.writeMicroseconds(1000);  
   delay(3000);
 
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     servos[i].write(NEUTRAL);
   }
 }

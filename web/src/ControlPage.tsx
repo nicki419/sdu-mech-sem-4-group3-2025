@@ -16,20 +16,22 @@ interface ControlPageProps {
 }
 
 const ControlPage: React.FC<ControlPageProps> = ({ darkMode, serialManager, serialLog, setSerialLog }) => {
-    const [valves, setValves] = useState<ValvePosition[]>(['neutral', 'neutral', 'neutral']);
+    const [valves, setValves] = useState<ValvePosition[]>(['neutral', 'neutral', 'neutral', 'neutral']);
     const pressedKeysRef = useRef<Set<string>>(new Set());
 
     const keyMap: Record<string, { index: number; position: ValvePosition }> = {
         a: { index: 0, position: 'open' },
         s: { index: 1, position: 'open' },
         d: { index: 2, position: 'open' },
+        c: { index: 3, position: 'open' },
         j: { index: 0, position: 'closed' },
         k: { index: 1, position: 'closed' },
         l: { index: 2, position: 'closed' },
+        n: { index: 3, position: 'closed' },
     };
 
     const updateValvesFromKeys = (keys: Set<string>) => {
-        const newValves: ValvePosition[] = ['neutral', 'neutral', 'neutral'];
+        const newValves: ValvePosition[] = ['neutral', 'neutral', 'neutral', 'neutral'];
         keys.forEach((key) => {
             const mapping = keyMap[key.toLowerCase()];
             if (mapping) {
